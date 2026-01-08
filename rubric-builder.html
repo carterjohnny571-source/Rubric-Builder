@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubric Builder - Teacher Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        .builder-panel {
+            padding: 30px;
+            border-right: 2px solid #e0e0e0;
+        }
+
+        .preview-panel {
+            padding: 30px;
+            background: #f8f9fa;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 1em;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-secondary {
+            background: #718096;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4a5568;
+        }
+
+        .criteria-list {
+            margin-top: 20px;
+        }
+
+        .criterion-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .criterion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .criterion-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .levels-input {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .level-input {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .level-input label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .level-input textarea {
+            min-height: 60px;
+            font-size: 0.9em;
+        }
+
+        .preview-rubric {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .rubric-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .rubric-task {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+
+        .rubric-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .rubric-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .rubric-table td {
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+
+        .rubric-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .criterion-name {
+            font-weight: 600;
+            color: #333;
+            width: 20%;
+        }
+
+        .level-descriptor {
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .builder-panel {
+                display: none;
+            }
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .preview-panel {
+                max-height: none;
+                overflow: visible;
+            }
+            .actions {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .builder-panel {
+                border-right: none;
+                border-bottom: 2px solid #e0e0e0;
+            }
+        }
+
+        .info-box {
+            background: #e6f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Rubric Builder</h1>
+            <p>Create professional rubrics for student assessment and self-evaluation</p>
+        </div>
+
+        <div class="main-content">
+            <div class="builder-panel">
+                <div class="info-box">
+                    <h3>Quick Guide</h3>
+                    <ul>
+                        <li>Enter your task name and description</li>
+                        <li>Choose performance levels (3-5 recommended)</li>
+                        <li>Add criteria with clear descriptors for each level</li>
+                        <li>Preview updates automatically</li>
+                        <li>Export or print when ready</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
+                    <label for="rubricTitle">Rubric Title *</label>
+                    <input type="text" id="rubricTitle" placeholder="e.g., Persuasive Essay Rubric" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskDescription">Task Description *</label>
+                    <textarea id="taskDescription" placeholder="e.g., Students will write a 500-word persuasive essay on a topic of their choice..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="numLevels">Number of Performance Levels *</label>
+                    <select id="numLevels" required>
+                        <option value="3">3 Levels (Below Expectations, Meets Expectations, Exceeds Expectations)</option>
+                        <option value="4" selected>4 Levels (Beginning, Developing, Proficient, Advanced)</option>
+                        <option value="5">5 Levels (Novice, Developing, Proficient, Advanced, Exemplary)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="levelNames">Level Names (comma-separated, optional)</label>
+                    <input type="text" id="levelNames" placeholder="e.g., Beginning, Developing, Proficient, Advanced (leave empty for defaults)">
+                </div>
+
+                <div class="form-group">
+                    <label>Add Criteria</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="newCriterion" placeholder="Enter criterion name (e.g., Thesis Statement)" style="flex: 1;">
+                        <button class="btn btn-primary" onclick="addCriterion()">Add Criterion</button>
+                    </div>
+                </div>
+
+                <div id="criteriaList" class="criteria-list"></div>
+
+                <div class="actions">
+                    <button class="btn btn-success" onclick="exportRubric()">📥 Export as HTML</button>
+                    <button class="btn btn-secondary" onclick="window.print()">🖨️ Print Rubric</button>
+                    <button class="btn btn-danger" onclick="clearRubric()">🗑️ Clear All</button>
+                </div>
+            </div>
+
+            <div class="preview-panel">
+                <h2 style="margin-bottom: 20px; color: #333;">Preview</h2>
+                <div id="rubricPreview" class="preview-rubric">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                        </svg>
+                        <p>Start building your rubric by adding criteria above</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let rubricData = {
+            title: '',
+            taskDescription: '',
+            numLevels: 4,
+            levelNames: [],
+            criteria: []
+        };
+
+        const defaultLevelNames = {
+            3: ['Below Expectations', 'Meets Expectations', 'Exceeds Expectations'],
+            4: ['Beginning', 'Developing', 'Proficient', 'Advanced'],
+            5: ['Novice', 'Developing', 'Proficient', 'Advanced', 'Exemplary']
+        };
+
+        document.getElementById('rubricTitle').addEventListener('input', updatePreview);
+        document.getElementById('taskDescription').addEventListener('input', updatePreview);
+        document.getElementById('numLevels').addEventListener('change', function() {
+            rubricData.numLevels = parseInt(this.value);
+            updateLevelNames();
+            updatePreview();
+            renderCriteria();
+        });
+        document.getElementById('levelNames').addEventListener('input', updateLevelNames);
+        document.getElementById('newCriterion').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addCriterion();
+            }
+        });
+
+        function updateLevelNames() {
+            const customNames = document.getElementById('levelNames').value.trim();
+            if (customNames) {
+                rubricData.levelNames = customNames.split(',').map(n => n.trim()).filter(n => n);
+            } else {
+                rubricData.levelNames = defaultLevelNames[rubricData.numLevels] || [];
+            }
+            if (rubricData.levelNames.length !== rubricData.numLevels) {
+                rubricData.levelNames = defaultLevelNames[rubricData.numLevels] || [];
+            }
+        }
+
+        function addCriterion() {
+            const input = document.getElementById('newCriterion');
+            const name = input.value.trim();
+            if (!name) {
+                alert('Please enter a criterion name');
+                return;
+            }
+
+            rubricData.criteria.push({
+                name: name,
+                descriptors: Array(rubricData.numLevels).fill('')
+            });
+
+            input.value = '';
+            renderCriteria();
+            updatePreview();
+        }
+
+        function removeCriterion(index) {
+            rubricData.criteria.splice(index, 1);
+            renderCriteria();
+            updatePreview();
+        }
+
+        function updateDescriptor(criterionIndex, levelIndex, value) {
+            rubricData.criteria[criterionIndex].descriptors[levelIndex] = value;
+            updatePreview();
+        }
+
+        function renderCriteria() {
+            const container = document.getElementById('criteriaList');
+            updateLevelNames();
+            
+            if (rubricData.criteria.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No criteria added yet. Add your first criterion above.</p>';
+                return;
+            }
+
+            container.innerHTML = rubricData.criteria.map((criterion, cIndex) => {
+                const levelsHtml = criterion.descriptors.map((desc, lIndex) => {
+                    const levelName = rubricData.levelNames[lIndex] || `Level ${lIndex + 1}`;
+                    return `
+                        <div class="level-input">
+                            <label>${levelName}</label>
+                            <textarea 
+                                oninput="updateDescriptor(${cIndex}, ${lIndex}, this.value)"
+                                placeholder="Describe what this level looks like..."
+                            >${desc}</textarea>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="criterion-item">
+                        <div class="criterion-header">
+                            <div class="criterion-title">${criterion.name}</div>
+                            <button class="btn btn-danger" onclick="removeCriterion(${cIndex})" style="padding: 6px 12px; font-size: 0.9em;">Remove</button>
+                        </div>
+                        <div class="levels-input">
+                            ${levelsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updatePreview() {
+            rubricData.title = document.getElementById('rubricTitle').value;
+            rubricData.taskDescription = document.getElementById('taskDescription').value;
+            updateLevelNames();
+
+            const preview = document.getElementById('rubricPreview');
+            
+            if (!rubricData.title || !rubricData.taskDescription || rubricData.criteria.length === 0) {
+                preview.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                        </svg>
+                        <p>Start building your rubric by adding criteria above</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const levelHeaders = rubricData.levelNames.map(name => `<th>${name}</th>`).join('');
+            
+            const criteriaRows = rubricData.criteria.map(criterion => {
+                const descriptors = criterion.descriptors.map(desc => 
+                    `<td class="level-descriptor">${desc || '<em style="color: #999;">No description yet</em>'}</td>`
+                ).join('');
+                return `
+                    <tr>
+                        <td class="criterion-name">${criterion.name}</td>
+                        ${descriptors}
+                    </tr>
+                `;
+            }).join('');
+
+            preview.innerHTML = `
+                <div class="rubric-title">${rubricData.title}</div>
+                <div class="rubric-task">${rubricData.taskDescription}</div>
+                <table class="rubric-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Criteria</th>
+                            ${levelHeaders}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${criteriaRows}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function exportRubric() {
+            if (!rubricData.title || rubricData.criteria.length === 0) {
+                alert('Please complete your rubric before exporting');
+                return;
+            }
+
+            updateLevelNames();
+            const levelHeaders = rubricData.levelNames.map(name => `<th>${name}</th>`).join('');
+            const criteriaRows = rubricData.criteria.map(criterion => {
+                const descriptors = criterion.descriptors.map(desc => 
+                    `<td>${desc || ''}</td>`
+                ).join('');
+                return `<tr><td><strong>${criterion.name}</strong></td>${descriptors}</tr>`;
+            }).join('');
+
+            const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${rubricData.title}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .rubric-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .task-desc {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        td {
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        @media print {
+            body { background: white; margin: 0; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="rubric-container">
+        <h1>${rubricData.title}</h1>
+        <div class="task-desc">${rubricData.taskDescription}</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Criteria</th>
+                    ${levelHeaders}
+                </tr>
+            </thead>
+            <tbody>
+                ${criteriaRows}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+            `;
+
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${rubricData.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_rubric.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function clearRubric() {
+            if (confirm('Are you sure you want to clear the entire rubric? This cannot be undone.')) {
+                rubricData = {
+                    title: '',
+                    taskDescription: '',
+                    numLevels: 4,
+                    levelNames: [],
+                    criteria: []
+                };
+                document.getElementById('rubricTitle').value = '';
+                document.getElementById('taskDescription').value = '';
+                document.getElementById('numLevels').value = '4';
+                document.getElementById('levelNames').value = '';
+                renderCriteria();
+                updatePreview();
+            }
+        }
+
+        // Initialize
+        updateLevelNames();
+        updatePreview();
+    </script>
+</body>
+</html>
