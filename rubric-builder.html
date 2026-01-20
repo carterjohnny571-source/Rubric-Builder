@@ -1,0 +1,2153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubric Builder - Teacher Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0;
+        }
+
+        .builder-panel {
+            padding: 30px;
+            border-right: 2px solid #e0e0e0;
+        }
+
+        .preview-panel {
+            padding: 30px;
+            background: #f8f9fa;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            border-right: 2px solid #e0e0e0;
+        }
+
+        .pfeq-panel {
+            padding: 30px;
+            background: #f0f4ff;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        .pfeq-panel h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .pfeq-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .pfeq-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+
+        .topic-checkbox {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .topic-checkbox input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .topic-checkbox label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .competency-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #ccc;
+        }
+
+        .competency-item.covered {
+            border-left-color: #48bb78;
+            background: #f0fdf4;
+        }
+
+        .competency-item.partial {
+            border-left-color: #fbbf24;
+            background: #fffbeb;
+        }
+
+        .competency-status {
+            margin-left: auto;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .competency-status.covered {
+            color: #48bb78;
+        }
+
+        .competency-status.partial {
+            color: #f59e0b;
+        }
+
+        .competency-status.missing {
+            color: #f56565;
+        }
+
+        .concept-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .concept-tag {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            background: #e0e0e0;
+            color: #666;
+            border: 2px solid transparent;
+        }
+
+        .concept-tag.covered {
+            background: #d1fae5;
+            color: #065f46;
+            border-color: #48bb78;
+        }
+
+        .concept-tag.partial {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fbbf24;
+        }
+
+        .coverage-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .coverage-percentage {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .suggestion-box {
+            background: #fff7ed;
+            border: 2px dashed #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .suggestion-item {
+            padding: 10px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #f59e0b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: #fef3c7;
+            transform: translateX(5px);
+        }
+
+        .suggestion-item button {
+            margin-top: 5px;
+            padding: 5px 10px;
+            font-size: 0.85em;
+        }
+
+        .learning-objective {
+            padding: 10px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #ccc;
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+        }
+
+        .learning-objective.covered {
+            border-left-color: #48bb78;
+            background: #f0fdf4;
+        }
+
+        .learning-objective-check {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .progression-info {
+            background: #fff7ed;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+
+        .progression-info h4 {
+            color: #f59e0b;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .progression-item {
+            margin: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .progression-item:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #f59e0b;
+            font-weight: bold;
+        }
+
+        .topic-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .topic-tag {
+            padding: 4px 10px;
+            background: #667eea;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .filter-active {
+            background: #f0f4ff;
+            border: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 1em;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-secondary {
+            background: #718096;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4a5568;
+        }
+
+        .criteria-list {
+            margin-top: 20px;
+        }
+
+        .criterion-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .criterion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .criterion-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .levels-input {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .level-input {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .level-input label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .level-input textarea {
+            min-height: 60px;
+            font-size: 0.9em;
+        }
+
+        .preview-rubric {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .rubric-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .rubric-task {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+
+        .rubric-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .rubric-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .rubric-table td {
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+
+        .rubric-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .criterion-name {
+            font-weight: 600;
+            color: #333;
+            width: 20%;
+        }
+
+        .level-descriptor {
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .builder-panel {
+                display: none;
+            }
+            .pfeq-panel {
+                display: none;
+            }
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .preview-panel {
+                max-height: none;
+                overflow: visible;
+                border-right: none;
+            }
+            .actions {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1400px) {
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
+            .pfeq-panel {
+                grid-column: 1 / -1;
+                border-top: 2px solid #e0e0e0;
+                max-height: none;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .builder-panel {
+                border-right: none;
+                border-bottom: 2px solid #e0e0e0;
+            }
+            .preview-panel {
+                border-right: none;
+                border-bottom: 2px solid #e0e0e0;
+                max-height: none;
+            }
+            .pfeq-panel {
+                border-top: 2px solid #e0e0e0;
+                max-height: none;
+            }
+            .pfeq-section {
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .pfeq-panel, .builder-panel, .preview-panel {
+                padding: 20px;
+            }
+            .levels-input {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-box {
+            background: #e6f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .selection-panel {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 2px solid #667eea;
+        }
+
+        .selection-panel h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .selection-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .selection-display {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            font-size: 0.9em;
+            color: #666;
+            min-height: 45px;
+            display: flex;
+            align-items: center;
+        }
+
+        .selection-display.has-selection {
+            color: #333;
+            font-weight: 600;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .selection-row {
+                grid-template-columns: 1fr;
+            }
+            .selection-panel {
+                padding: 15px;
+            }
+            .selection-panel h3 {
+                font-size: 1em;
+            }
+            .selection-display {
+                font-size: 0.85em;
+                min-height: 40px;
+            }
+        }
+    </style>
+    <!-- Load extracted PFEQ curriculum data with cache-busting -->
+    <script>
+        // Dynamic cache-busting: add timestamp to force reload
+        const script = document.createElement('script');
+        script.src = 'pfeq_curriculum_data.js?v=' + new Date().getTime();
+        script.onerror = function() {
+            console.error('Failed to load pfeq_curriculum_data.js');
+            document.body.insertAdjacentHTML('afterbegin', 
+                '<div style="background: #fee; border: 2px solid #f00; padding: 15px; margin: 10px; border-radius: 5px;">' +
+                '<strong>Error:</strong> Could not load curriculum data file. Please ensure pfeq_curriculum_data.js exists in the same directory.</div>'
+            );
+        };
+        document.head.appendChild(script);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="flex: 1;"></div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary" onclick="window.location.href='rubric-builder.html'" style="background: rgba(255,255,255,0.2); border: 2px solid white;">📋 Rubric Builder</button>
+                    <button class="btn btn-secondary" onclick="window.location.href='calendar-grades.html'" style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.5);">📅 Calendar & Grades</button>
+                </div>
+            </div>
+            <h1>📋 Rubric Builder</h1>
+            <p>Create professional rubrics for student assessment and self-evaluation</p>
+        </div>
+
+        <div class="main-content">
+            <div class="builder-panel">
+                <div class="selection-panel">
+                    <h3>📚 Select Curriculum</h3>
+                    <div class="selection-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="subjectSelect">Subject *</label>
+                            <select id="subjectSelect" onchange="selectSubject(this.value)">
+                                <option value="">-- Select Subject --</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="gradeSelect">Grade</label>
+                            <select id="gradeSelect" onchange="selectGrade(this.value)" disabled>
+                                <option value="">-- Select Grade --</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="topicSelect">Topic</label>
+                            <select id="topicSelect" onchange="selectTopic(this.value)" disabled>
+                                <option value="">-- Select Topic --</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-secondary" onclick="clearSelection()" style="padding: 12px 16px; font-size: 0.9em;">Clear</button>
+                    </div>
+                    <div class="selection-display" id="selectionDisplay">
+                        No curriculum selected. Select a subject, grade, and topic to get curriculum-aligned suggestions.
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h3>Quick Guide</h3>
+                    <ul>
+                        <li>Select a subject, grade, and topic for curriculum alignment</li>
+                        <li>Enter your task name and description</li>
+                        <li>Choose performance levels (3-5 recommended)</li>
+                        <li>Add criteria with clear descriptors for each level</li>
+                        <li>Preview updates automatically</li>
+                        <li>Export or print when ready</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
+                    <label for="rubricTitle">Rubric Title *</label>
+                    <input type="text" id="rubricTitle" placeholder="e.g., Persuasive Essay Rubric" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskDescription">Task Description *</label>
+                    <textarea id="taskDescription" placeholder="e.g., Students will write a 500-word persuasive essay on a topic of their choice..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="numLevels">Number of Performance Levels *</label>
+                    <select id="numLevels" required>
+                        <option value="3">3 Levels (Below Expectations, Meets Expectations, Exceeds Expectations)</option>
+                        <option value="4" selected>4 Levels (Beginning, Developing, Proficient, Advanced)</option>
+                        <option value="5">5 Levels (Novice, Developing, Proficient, Advanced, Exemplary)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="levelNames">Level Names (comma-separated, optional)</label>
+                    <input type="text" id="levelNames" placeholder="e.g., Beginning, Developing, Proficient, Advanced (leave empty for defaults)">
+                </div>
+
+                <div class="form-group">
+                    <label>Add Criteria</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="newCriterion" placeholder="Enter criterion name (e.g., Thesis Statement)" style="flex: 1;">
+                        <button class="btn btn-primary" onclick="addCriterion()">Add Criterion</button>
+                    </div>
+                </div>
+
+                <div id="criteriaList" class="criteria-list"></div>
+
+                <div class="actions">
+                    <button class="btn btn-success" onclick="saveRubric()">💾 Save Rubric</button>
+                    <button class="btn btn-success" onclick="exportRubric()">📥 Export as HTML</button>
+                    <button class="btn btn-secondary" onclick="window.print()">🖨️ Print Rubric</button>
+                    <button class="btn btn-danger" onclick="clearRubric()">🗑️ Clear All</button>
+                </div>
+            </div>
+
+            <div class="preview-panel">
+                <h2 style="margin-bottom: 20px; color: #333;">Preview</h2>
+                <div id="rubricPreview" class="preview-rubric">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                        </svg>
+                        <p>Start building your rubric by adding criteria above</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pfeq-panel">
+                <h2 style="margin-bottom: 20px; color: #333;">PFEQ Curriculum</h2>
+                
+                <div class="pfeq-section">
+                    <h3>Competencies</h3>
+                    <div id="competencyList"></div>
+                </div>
+
+                <div class="pfeq-section" id="curriculumContextSection" style="display: none;">
+                    <h3>Curriculum Context</h3>
+                    <div id="curriculumContext">
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px; font-size: 1em;">Cross-Curricular Competencies</h4>
+                            <div id="crossCurricularCompetencies"></div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px; font-size: 1em;">Broad Areas of Learning</h4>
+                            <div id="broadAreasOfLearning"></div>
+                        </div>
+                        <div>
+                            <h4 style="color: #667eea; margin-bottom: 10px; font-size: 1em;">Subject-Specific Broad Themes</h4>
+                            <div id="subjectThemes"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PFEQ Curriculum Data Structure
+        // If the external file defined pfeqCurriculum, reuse it; otherwise initialize empty
+        if (typeof pfeqCurriculum === 'undefined') {
+            window.pfeqCurriculum = { subjects: {} };
+        }
+
+        // Current selection state
+        let currentSelection = {
+            subject: null,
+            grade: null,
+            topic: null
+        };
+
+        let selectedTopics = [];
+        let rubricData = {
+            title: '',
+            taskDescription: '',
+            numLevels: 4,
+            levelNames: [],
+            criteria: [],
+            curriculum: {
+                subject: null,
+                grade: null,
+                topic: null
+            }
+        };
+
+        const defaultLevelNames = {
+            3: ['Below Expectations', 'Meets Expectations', 'Exceeds Expectations'],
+            4: ['Beginning', 'Developing', 'Proficient', 'Advanced'],
+            5: ['Novice', 'Developing', 'Proficient', 'Advanced', 'Exemplary']
+        };
+
+        document.getElementById('rubricTitle').addEventListener('input', updatePreview);
+        document.getElementById('taskDescription').addEventListener('input', updatePreview);
+        document.getElementById('numLevels').addEventListener('change', function() {
+            rubricData.numLevels = parseInt(this.value);
+            updateLevelNames();
+            updatePreview();
+            renderCriteria();
+        });
+        document.getElementById('levelNames').addEventListener('input', updateLevelNames);
+        document.getElementById('newCriterion').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addCriterion();
+            }
+        });
+
+        function updateLevelNames() {
+            const customNames = document.getElementById('levelNames').value.trim();
+            if (customNames) {
+                rubricData.levelNames = customNames.split(',').map(n => n.trim()).filter(n => n);
+            } else {
+                rubricData.levelNames = defaultLevelNames[rubricData.numLevels] || [];
+            }
+            if (rubricData.levelNames.length !== rubricData.numLevels) {
+                rubricData.levelNames = defaultLevelNames[rubricData.numLevels] || [];
+            }
+        }
+
+        function addCriterion() {
+            const input = document.getElementById('newCriterion');
+            const name = input.value.trim();
+            if (!name) {
+                alert('Please enter a criterion name');
+                return;
+            }
+
+            rubricData.criteria.push({
+                name: name,
+                descriptors: Array(rubricData.numLevels).fill(''),
+                topics: [] // PFEQ topic associations
+            });
+
+            input.value = '';
+            matchCriterionToPFEQ(rubricData.criteria.length - 1);
+            renderCriteria();
+            updatePreview();
+            updatePFEQValidation();
+        }
+
+        function removeCriterion(index) {
+            rubricData.criteria.splice(index, 1);
+            renderCriteria();
+            updatePreview();
+            updatePFEQValidation();
+        }
+
+        function updateDescriptor(criterionIndex, levelIndex, value) {
+            rubricData.criteria[criterionIndex].descriptors[levelIndex] = value;
+            updatePreview();
+            updatePFEQValidation();
+        }
+
+        function renderCriteria() {
+            const container = document.getElementById('criteriaList');
+            updateLevelNames();
+            
+            if (rubricData.criteria.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No criteria added yet. Add your first criterion above.</p>';
+                return;
+            }
+
+            const filteredCriteria = filterCriteriaByTopic();
+            
+            container.innerHTML = filteredCriteria.map((criterion, cIndex) => {
+                const originalIndex = rubricData.criteria.indexOf(criterion);
+                const levelsHtml = criterion.descriptors.map((desc, lIndex) => {
+                    const levelName = rubricData.levelNames[lIndex] || `Level ${lIndex + 1}`;
+                    return `
+                        <div class="level-input">
+                            <label>${levelName}</label>
+                            <textarea 
+                                oninput="updateDescriptor(${originalIndex}, ${lIndex}, this.value)"
+                                placeholder="Describe what this level looks like..."
+                            >${desc}</textarea>
+                        </div>
+                    `;
+                }).join('');
+
+                const topicTags = (criterion.topics || []).map(topicName => {
+                    return `<span class="topic-tag">${topicName}</span>`;
+                }).join('');
+
+                const gradeAlignmentWarning = criterion.gradeAlignment && criterion.gradeAlignment.alignment !== 'appropriate' 
+                    ? `<div style="background: #fef3c7; border-left: 3px solid #f59e0b; padding: 8px; margin-top: 8px; border-radius: 4px; font-size: 0.85em;">
+                        <strong>Grade Level Note:</strong> ${criterion.gradeAlignment.suggestion || 'Consider grade level appropriateness'}
+                       </div>` 
+                    : '';
+
+                return `
+                    <div class="criterion-item ${selectedTopics.length > 0 && criterion.topics && criterion.topics.some(t => {
+                        const curriculumData = getCurriculumData(currentSelection.subject, currentSelection.grade, currentSelection.topic);
+                        if (!curriculumData || !curriculumData.allTopics) return false;
+                        const topicIndex = curriculumData.allTopics.findIndex(topic => topic.name === t);
+                        return topicIndex >= 0 && selectedTopics.includes(topicIndex);
+                    }) ? 'filter-active' : ''}">
+                        <div class="criterion-header">
+                            <div class="criterion-title">${criterion.name}</div>
+                            <button class="btn btn-danger" onclick="removeCriterion(${originalIndex})" style="padding: 6px 12px; font-size: 0.9em;">Remove</button>
+                        </div>
+                        ${topicTags ? `<div class="topic-tags">${topicTags}</div>` : ''}
+                        ${gradeAlignmentWarning}
+                        <div class="levels-input">
+                            ${levelsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updatePreview() {
+            rubricData.title = document.getElementById('rubricTitle').value;
+            rubricData.taskDescription = document.getElementById('taskDescription').value;
+            updateLevelNames();
+
+            const preview = document.getElementById('rubricPreview');
+            
+            if (!rubricData.title || !rubricData.taskDescription || rubricData.criteria.length === 0) {
+                preview.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                        </svg>
+                        <p>Start building your rubric by adding criteria above</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const levelHeaders = rubricData.levelNames.map(name => `<th>${name}</th>`).join('');
+            
+            const criteriaRows = rubricData.criteria.map(criterion => {
+                const descriptors = criterion.descriptors.map(desc => 
+                    `<td class="level-descriptor">${desc || '<em style="color: #999;">No description yet</em>'}</td>`
+                ).join('');
+                return `
+                    <tr>
+                        <td class="criterion-name">${criterion.name}</td>
+                        ${descriptors}
+                    </tr>
+                `;
+            }).join('');
+
+            preview.innerHTML = `
+                <div class="rubric-title">${rubricData.title}</div>
+                <div class="rubric-task">${rubricData.taskDescription}</div>
+                <table class="rubric-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Criteria</th>
+                            ${levelHeaders}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${criteriaRows}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function saveRubric() {
+            if (!rubricData.title || rubricData.criteria.length === 0) {
+                alert('Please complete your rubric before saving');
+                return;
+            }
+
+            updateLevelNames();
+            
+            const savedRubric = {
+                id: Date.now().toString(),
+                title: rubricData.title,
+                taskDescription: rubricData.taskDescription,
+                numLevels: rubricData.numLevels,
+                levelNames: rubricData.levelNames,
+                criteria: rubricData.criteria,
+                curriculum: rubricData.curriculum,
+                dateCreated: new Date().toISOString(),
+                dateModified: new Date().toISOString()
+            };
+
+            // Get existing saved rubrics
+            let savedRubrics = JSON.parse(localStorage.getItem('savedRubrics') || '[]');
+            
+            // Check if updating existing rubric
+            const existingIndex = savedRubrics.findIndex(r => r.id === savedRubric.id);
+            if (existingIndex >= 0) {
+                savedRubrics[existingIndex] = savedRubric;
+            } else {
+                savedRubrics.push(savedRubric);
+            }
+
+            // Save to localStorage
+            localStorage.setItem('savedRubrics', JSON.stringify(savedRubrics));
+            
+            alert('Rubric saved successfully!');
+        }
+
+        function exportRubric() {
+            if (!rubricData.title || rubricData.criteria.length === 0) {
+                alert('Please complete your rubric before exporting');
+                return;
+            }
+
+            updateLevelNames();
+            const levelHeaders = rubricData.levelNames.map(name => `<th>${name}</th>`).join('');
+            const criteriaRows = rubricData.criteria.map(criterion => {
+                const descriptors = criterion.descriptors.map(desc => 
+                    `<td>${desc || ''}</td>`
+                ).join('');
+                return `<tr><td><strong>${criterion.name}</strong></td>${descriptors}</tr>`;
+            }).join('');
+
+            const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${rubricData.title}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .rubric-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .task-desc {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        td {
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        @media print {
+            body { background: white; margin: 0; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="rubric-container">
+        <h1>${rubricData.title}</h1>
+        <div class="task-desc">${rubricData.taskDescription}</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Criteria</th>
+                    ${levelHeaders}
+                </tr>
+            </thead>
+            <tbody>
+                ${criteriaRows}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+            `;
+
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${rubricData.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_rubric.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function clearRubric() {
+            if (confirm('Are you sure you want to clear the entire rubric? This cannot be undone.')) {
+                rubricData = {
+                    title: '',
+                    taskDescription: '',
+                    numLevels: 4,
+                    levelNames: [],
+                    criteria: [],
+                    curriculum: {
+                        subject: null,
+                        grade: null,
+                        topic: null
+                    }
+                };
+                selectedTopics = [];
+                document.getElementById('rubricTitle').value = '';
+                document.getElementById('taskDescription').value = '';
+                document.getElementById('numLevels').value = '4';
+                document.getElementById('levelNames').value = '';
+                clearSelection();
+                renderCriteria();
+                updatePreview();
+                updatePFEQValidation();
+            }
+        }
+
+        // Curriculum Selection Functions
+        function initializePFEQCurriculum() {
+            // Populate subject dropdown
+            const subjectSelect = document.getElementById('subjectSelect');
+            const subjectCount = Object.keys(pfeqCurriculum.subjects).length;
+            
+            if (subjectCount === 0) {
+                console.warn('No subjects found in curriculum data');
+                const errorOption = document.createElement('option');
+                errorOption.value = '';
+                errorOption.textContent = 'No curriculum data available';
+                errorOption.disabled = true;
+                subjectSelect.appendChild(errorOption);
+                return;
+            }
+            
+            Object.keys(pfeqCurriculum.subjects).forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                subjectSelect.appendChild(option);
+            });
+            
+            console.log(`Initialized ${subjectCount} subject(s) in dropdown`);
+
+            // Restore selection from rubric data if available
+            if (rubricData.curriculum && rubricData.curriculum.subject) {
+                selectSubject(rubricData.curriculum.subject, false);
+                if (rubricData.curriculum.grade) {
+                    selectGrade(rubricData.curriculum.grade, false);
+                    if (rubricData.curriculum.topic) {
+                        selectTopic(rubricData.curriculum.topic, false);
+                    }
+                }
+            }
+
+            updateSelectionDisplay();
+        }
+
+        function getSubjectList() {
+            return Object.keys(pfeqCurriculum.subjects);
+        }
+
+        function getGradesForSubject(subject) {
+            if (!subject || !pfeqCurriculum.subjects[subject]) return [];
+            const grades = Object.keys(pfeqCurriculum.subjects[subject].grades);
+            // Sort grades logically: Preschool, then Elementary 1-6, then Secondary 1-5
+            const gradeOrder = {
+                'Preschool': 0,
+                'Elementary': 1,
+                'Elementary 1': 2, 'Elementary 2': 3, 'Elementary 3': 4,
+                'Elementary 4': 5, 'Elementary 5': 6, 'Elementary 6': 7,
+                'Secondary 1': 8, 'Secondary 2': 9, 'Secondary 3': 10,
+                'Secondary 4': 11, 'Secondary 5': 12
+            };
+            return grades.sort((a, b) => {
+                const orderA = gradeOrder[a] !== undefined ? gradeOrder[a] : 999;
+                const orderB = gradeOrder[b] !== undefined ? gradeOrder[b] : 999;
+                return orderA - orderB;
+            });
+        }
+
+        function getTopicsForGrade(subject, grade) {
+            if (!subject || !grade || !pfeqCurriculum.subjects[subject] || !pfeqCurriculum.subjects[subject].grades[grade]) return [];
+            return pfeqCurriculum.subjects[subject].grades[grade].topics;
+        }
+
+        function getCurriculumData(subject, grade, topic) {
+            if (!subject || !grade || !topic) return null;
+            const subjectData = pfeqCurriculum.subjects[subject];
+            if (!subjectData) return null;
+            const gradeData = subjectData.grades[grade];
+            if (!gradeData) return null;
+            const topicData = gradeData.topics.find(t => t.name === topic);
+            return {
+                subject: subject,
+                grade: grade,
+                topic: topicData,
+                competencies: gradeData.competencies,
+                allTopics: gradeData.topics,
+                crossCurricularCompetencies: gradeData.crossCurricularCompetencies || [],
+                broadAreasOfLearning: gradeData.broadAreasOfLearning || [],
+                subjectThemes: gradeData.subjectThemes || []
+            };
+        }
+
+        function selectSubject(subject, updateValidation = true) {
+            currentSelection.subject = subject;
+            currentSelection.grade = null;
+            currentSelection.topic = null;
+
+            const gradeSelect = document.getElementById('gradeSelect');
+            const topicSelect = document.getElementById('topicSelect');
+
+            // Clear and disable grade dropdown
+            gradeSelect.innerHTML = '<option value="">-- Select Grade --</option>';
+            gradeSelect.disabled = !subject;
+
+            // Clear and disable topic dropdown
+            topicSelect.innerHTML = '<option value="">-- Select Topic --</option>';
+            topicSelect.disabled = true;
+
+            if (subject) {
+                // Populate grade dropdown
+                const grades = getGradesForSubject(subject);
+                grades.forEach(grade => {
+                    const option = document.createElement('option');
+                    option.value = grade;
+                    option.textContent = grade;
+                    gradeSelect.appendChild(option);
+                });
+                gradeSelect.disabled = false;
+            }
+
+            saveSelectionToRubric();
+            updateSelectionDisplay();
+            if (updateValidation) {
+                updatePFEQValidation();
+            }
+        }
+
+        function selectGrade(grade, updateValidation = true) {
+            currentSelection.grade = grade;
+            currentSelection.topic = null;
+
+            const topicSelect = document.getElementById('topicSelect');
+
+            // Clear topic dropdown
+            topicSelect.innerHTML = '<option value="">-- Select Topic --</option>';
+            topicSelect.disabled = !grade;
+
+            if (grade && currentSelection.subject) {
+                // Populate topic dropdown
+                const topics = getTopicsForGrade(currentSelection.subject, grade);
+                topics.forEach(topic => {
+                    const option = document.createElement('option');
+                    option.value = topic.name;
+                    option.textContent = topic.name;
+                    topicSelect.appendChild(option);
+                });
+                topicSelect.disabled = false;
+            }
+
+            saveSelectionToRubric();
+            updateSelectionDisplay();
+            updateCurriculumContext(); // Hide context when grade changes (topic cleared)
+            if (updateValidation) {
+                updatePFEQValidation();
+            }
+        }
+
+        function selectTopic(topic, updateValidation = true) {
+            currentSelection.topic = topic;
+            saveSelectionToRubric();
+            updateSelectionDisplay();
+            updateCurriculumContext();
+            if (updateValidation) {
+                updatePFEQValidation();
+            }
+        }
+        
+        function updateCurriculumContext() {
+            const contextSection = document.getElementById('curriculumContextSection');
+            if (!contextSection) return;
+            
+            if (!currentSelection.subject || !currentSelection.grade || !currentSelection.topic) {
+                contextSection.style.display = 'none';
+                return;
+            }
+            
+            const curriculumData = getCurriculumData(currentSelection.subject, currentSelection.grade, currentSelection.topic);
+            if (!curriculumData) {
+                contextSection.style.display = 'none';
+                return;
+            }
+            
+            contextSection.style.display = 'block';
+            
+            // Display cross-curricular competencies as multi-select dropdown
+            const crossCurricularEl = document.getElementById('crossCurricularCompetencies');
+            if (crossCurricularEl) {
+                if (curriculumData.crossCurricularCompetencies && curriculumData.crossCurricularCompetencies.length > 0) {
+                    const selectEl = document.createElement('select');
+                    selectEl.multiple = true;
+                    selectEl.style.cssText = 'width: 100%; min-height: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95em; background: white;';
+                    curriculumData.crossCurricularCompetencies.forEach(comp => {
+                        const option = document.createElement('option');
+                        option.value = comp;
+                        option.textContent = comp;
+                        selectEl.appendChild(option);
+                    });
+                    crossCurricularEl.innerHTML = '';
+                    crossCurricularEl.appendChild(selectEl);
+                } else {
+                    crossCurricularEl.innerHTML = '<p style="color: #999; font-style: italic;">No cross-curricular competencies available</p>';
+                }
+            }
+            
+            // Display broad areas of learning as multi-select dropdown
+            const broadAreasEl = document.getElementById('broadAreasOfLearning');
+            if (broadAreasEl) {
+                if (curriculumData.broadAreasOfLearning && curriculumData.broadAreasOfLearning.length > 0) {
+                    const selectEl = document.createElement('select');
+                    selectEl.multiple = true;
+                    selectEl.style.cssText = 'width: 100%; min-height: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95em; background: white;';
+                    curriculumData.broadAreasOfLearning.forEach(area => {
+                        const option = document.createElement('option');
+                        option.value = area;
+                        option.textContent = area;
+                        selectEl.appendChild(option);
+                    });
+                    broadAreasEl.innerHTML = '';
+                    broadAreasEl.appendChild(selectEl);
+                } else {
+                    broadAreasEl.innerHTML = '<p style="color: #999; font-style: italic;">No broad areas of learning available</p>';
+                }
+            }
+            
+            // Display subject themes as multi-select dropdown
+            const subjectThemesEl = document.getElementById('subjectThemes');
+            if (subjectThemesEl) {
+                if (curriculumData.subjectThemes && curriculumData.subjectThemes.length > 0) {
+                    const selectEl = document.createElement('select');
+                    selectEl.multiple = true;
+                    selectEl.style.cssText = 'width: 100%; min-height: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95em; background: white;';
+                    curriculumData.subjectThemes.forEach(theme => {
+                        const option = document.createElement('option');
+                        option.value = theme;
+                        option.textContent = theme;
+                        selectEl.appendChild(option);
+                    });
+                    subjectThemesEl.innerHTML = '';
+                    subjectThemesEl.appendChild(selectEl);
+                } else {
+                    subjectThemesEl.innerHTML = '<p style="color: #999; font-style: italic;">No subject themes available</p>';
+                }
+            }
+        }
+
+        function clearSelection() {
+            currentSelection.subject = null;
+            currentSelection.grade = null;
+            currentSelection.topic = null;
+
+            document.getElementById('subjectSelect').value = '';
+            document.getElementById('gradeSelect').value = '';
+            document.getElementById('gradeSelect').disabled = true;
+            document.getElementById('topicSelect').value = '';
+            document.getElementById('topicSelect').disabled = true;
+
+            rubricData.curriculum.subject = null;
+            rubricData.curriculum.grade = null;
+            rubricData.curriculum.topic = null;
+
+            updateSelectionDisplay();
+            updateCurriculumContext(); // Hide curriculum context
+            updatePFEQValidation();
+        }
+
+        function updateSelectionDisplay() {
+            const display = document.getElementById('selectionDisplay');
+            if (currentSelection.subject && currentSelection.grade && currentSelection.topic) {
+                display.textContent = `${currentSelection.subject} → ${currentSelection.grade} → ${currentSelection.topic}`;
+                display.classList.add('has-selection');
+            } else if (currentSelection.subject && currentSelection.grade) {
+                display.textContent = `${currentSelection.subject} → ${currentSelection.grade} (Select a topic)`;
+                display.classList.remove('has-selection');
+            } else if (currentSelection.subject) {
+                display.textContent = `${currentSelection.subject} (Select a grade)`;
+                display.classList.remove('has-selection');
+            } else {
+                display.textContent = 'No curriculum selected. Select a subject, grade, and topic to get curriculum-aligned suggestions.';
+                display.classList.remove('has-selection');
+            }
+        }
+
+        function saveSelectionToRubric() {
+            rubricData.curriculum.subject = currentSelection.subject;
+            rubricData.curriculum.grade = currentSelection.grade;
+            rubricData.curriculum.topic = currentSelection.topic;
+        }
+
+        // PFEQ Functions (updated for curriculum structure)
+        function initializePFEQData() {
+            renderTopicFilters();
+            updatePFEQValidation();
+        }
+
+        function renderTopicFilters() {
+            const container = document.getElementById('topicFilters');
+            if (!container) return;
+            
+            const curriculumData = getCurriculumData(currentSelection.subject, currentSelection.grade, currentSelection.topic);
+            
+            if (!curriculumData || !curriculumData.allTopics) {
+                container.innerHTML = '<p style="color: #999; font-style: italic;">Select a subject, grade, and topic to see topic filters</p>';
+                return;
+            }
+            
+            container.innerHTML = curriculumData.allTopics.map((topic, index) => `
+                <div class="topic-checkbox">
+                    <input type="checkbox" id="topic-${index}" value="${index}" 
+                           onchange="toggleTopicFilter(${index})" ${selectedTopics.includes(index) ? 'checked' : ''}>
+                    <label for="topic-${index}">${topic.name}</label>
+                </div>
+            `).join('');
+        }
+
+        function toggleTopicFilter(topicIndex) {
+            const checkbox = document.getElementById(`topic-${topicIndex}`);
+            if (checkbox.checked) {
+                if (!selectedTopics.includes(topicIndex)) {
+                    selectedTopics.push(topicIndex);
+                }
+            } else {
+                selectedTopics = selectedTopics.filter(t => t !== topicIndex);
+            }
+            renderCriteria();
+            updatePFEQValidation();
+            updateSuggestions();
+        }
+
+        function clearTopicFilters() {
+            selectedTopics = [];
+            const curriculumData = getCurriculumData(currentSelection.subject, currentSelection.grade, currentSelection.topic);
+            if (curriculumData && curriculumData.allTopics) {
+                curriculumData.allTopics.forEach((topic, index) => {
+                    const checkbox = document.getElementById(`topic-${index}`);
+                    if (checkbox) checkbox.checked = false;
+                });
+            }
+            renderCriteria();
+            updatePFEQValidation();
+        }
+
+        function filterCriteriaByTopic() {
+            if (selectedTopics.length === 0) {
+                return rubricData.criteria;
+            }
+            const curriculumData = getCurriculumData(currentSelection.subject, currentSelection.grade, currentSelection.topic);
+            if (!curriculumData || !curriculumData.allTopics) {
+                return rubricData.criteria;
+            }
+            
+            return rubricData.criteria.filter(criterion => {
+                if (!criterion.topics || criterion.topics.length === 0) return false;
+                return criterion.topics.some(topicName => {
+                    const topicIndex = curriculumData.allTopics.findIndex(t => t.name === topicName);
+                    return topicIndex >= 0 && selectedTopics.includes(topicIndex);
+                });
+            });
+        }
+
+        function matchCriterionToCurriculum(criterionIndex) {
+            const criterion = rubricData.criteria[criterionIndex];
+            if (!criterion) return;
+            
+            const text = (criterion.name + ' ' + criterion.descriptors.join(' ')).toLowerCase();
+            const matchedTopics = [];
+            let gradeAlignment = null;
+            
+            // If we have a selected curriculum, match to that
+            if (currentSelection.subject && currentSelection.grade) {
+                const curriculumData = getCurriculumData(currentSelection.subject, currentSelection.grade, currentSelection.topic);
+                if (curriculumData && curriculumData.allTopics) {
+                    curriculumData.allTopics.forEach(topic => {
+                        // Check topic name
+                        if (text.includes(topic.name.toLowerCase().substring(0, Math.min(15, topic.name.length)))) {
+                            matchedTopics.push(topic.name);
+                            return;
+                        }
+                        
+                        // Check concepts
+                        const conceptMatches = topic.concepts.filter(concept => 
+                            text.includes(concept.toLowerCase())
+                        );
+                        
+                        if (conceptMatches.length >= 2) {
+                            matchedTopics.push(topic.name);
+                        }
+                    });
+
+                    // Check grade level alignment
+                    gradeAlignment = checkGradeLevelAlignment(criterion, curriculumData);
+                    criterion.gradeAlignment = gradeAlignment;
+                }
+            } else {
+                // Fallback: search all subjects (backward compatibility)
+                Object.keys(pfeqCurriculum.subjects).forEach(subject => {
+                    Object.keys(pfeqCurriculum.subjects[subject].grades).forEach(grade => {
+                        const topics = pfeqCurriculum.subjects[subject].grades[grade].topics;
+                        topics.forEach(topic => {
+                            if (text.includes(topic.name.toLowerCase().substring(0, Math.min(15, topic.name.length)))) {
+                                if (!matchedTopics.includes(topic.name)) {
+                                    matchedTopics.push(topic.name);
+                                }
+                            }
+                        });
+                    });
+                });
+            }
+            
+            criterion.topics = matchedTopics;
+        }
+
+        function checkGradeLevelAlignment(criterion, curriculumData) {
+            if (!curriculumData || !curriculumData.grade) return null;
+
+            const text = (criterion.name + ' ' + criterion.descriptors.join(' ')).toLowerCase();
+            const gradeNum = parseInt(curriculumData.grade.replace(/\D/g, '')) || 0;
+            
+            // Advanced keywords that suggest higher grade levels
+            const advancedKeywords = ['sophisticated', 'nuanced', 'complex', 'synthesize', 'critically', 'expertly', 'master', 'advanced', 'comprehensive'];
+            const basicKeywords = ['identify', 'recognize', 'basic', 'simple', 'understand', 'describe'];
+            
+            const hasAdvanced = advancedKeywords.some(kw => text.includes(kw));
+            const hasBasic = basicKeywords.some(kw => text.includes(kw));
+            
+            let alignment = 'appropriate';
+            let suggestion = null;
+            
+            if (hasAdvanced && gradeNum < 4) {
+                alignment = 'too_advanced';
+                suggestion = `This criterion may be too advanced for ${curriculumData.grade}. Consider adjusting for grade level.`;
+            } else if (hasBasic && gradeNum >= 4) {
+                alignment = 'too_basic';
+                suggestion = `This criterion may be too basic for ${curriculumData.grade}. Consider adding more depth.`;
+            }
+            
+            return {
+                alignment: alignment,
+                suggestion: suggestion,
+                grade: curriculumData.grade
+            };
+        }
+
+        function suggestGradeAdjustments() {
+            // This function can be called to show suggestions for all criteria
+            const adjustments = [];
+            rubricData.criteria.forEach((criterion, index) => {
+                if (criterion.gradeAlignment && criterion.gradeAlignment.alignment !== 'appropriate') {
+                    adjustments.push({
+                        criterionIndex: index,
+                        criterionName: criterion.name,
+                        alignment: criterion.gradeAlignment
+                    });
+                }
+            });
+            return adjustments;
+        }
+
+        // Alias for backward compatibility
+        function matchCriterionToPFEQ(criterionIndex) {
+            matchCriterionToCurriculum(criterionIndex);
+        }
+
+        function calculateGradeSpecificCoverage() {
+            const curriculumData = getCurriculumData(currentSelection.subject, currentSelection.grade, currentSelection.topic);
+            
+            if (!curriculumData) {
+                return {
+                    competencies: [],
+                    topics: [],
+                    concepts: {},
+                    learningObjectives: {},
+                    overall: 0
+                };
+            }
+
+            const coverage = {
+                competencies: curriculumData.competencies.map(() => false),
+                topics: curriculumData.allTopics.map(() => false),
+                concepts: {},
+                learningObjectives: {},
+                overall: 0
+            };
+
+            // Collect all concepts and learning objectives from selected topic
+            if (curriculumData.topic) {
+                curriculumData.topic.concepts.forEach(concept => {
+                    if (!coverage.concepts[concept]) {
+                        coverage.concepts[concept] = false;
+                    }
+                });
+                if (curriculumData.topic.learningObjectives) {
+                    curriculumData.topic.learningObjectives.forEach(obj => {
+                        coverage.learningObjectives[obj] = false;
+                    });
+                }
+            }
+
+            // Also collect from all topics in grade
+            curriculumData.allTopics.forEach(topic => {
+                topic.concepts.forEach(concept => {
+                    if (!coverage.concepts[concept]) {
+                        coverage.concepts[concept] = false;
+                    }
+                });
+            });
+
+            // Analyze criteria
+            rubricData.criteria.forEach(criterion => {
+                const text = (criterion.name + ' ' + criterion.descriptors.join(' ')).toLowerCase();
+                
+                // Check competencies
+                curriculumData.competencies.forEach((comp, index) => {
+                    const compText = comp.name.toLowerCase();
+                    const keywords = compText.split(' ').filter(w => w.length > 4);
+                    
+                    if (keywords.some(keyword => text.includes(keyword)) || 
+                        comp.learningObjectives.some(obj => text.includes(obj.toLowerCase().substring(0, 10)))) {
+                        coverage.competencies[index] = true;
+                    }
+                });
+
+                // Check topics
+                if (criterion.topics) {
+                    criterion.topics.forEach(topicName => {
+                        const topicIndex = curriculumData.allTopics.findIndex(t => t.name === topicName);
+                        if (topicIndex >= 0) {
+                            coverage.topics[topicIndex] = true;
+                        }
+                    });
+                }
+
+                // Check concepts
+                Object.keys(coverage.concepts).forEach(concept => {
+                    if (text.includes(concept.toLowerCase())) {
+                        coverage.concepts[concept] = true;
+                    }
+                });
+
+                // Check learning objectives
+                if (curriculumData.topic && curriculumData.topic.learningObjectives) {
+                    curriculumData.topic.learningObjectives.forEach(obj => {
+                        const objKeywords = obj.toLowerCase().split(' ').filter(w => w.length > 4);
+                        if (objKeywords.some(keyword => text.includes(keyword))) {
+                            coverage.learningObjectives[obj] = true;
+                        }
+                    });
+                }
+            });
+
+            // Calculate overall percentage
+            const totalElements = coverage.competencies.length + 
+                                 coverage.topics.length + 
+                                 Object.keys(coverage.concepts).length +
+                                 Object.keys(coverage.learningObjectives).length;
+            const coveredElements = 
+                coverage.competencies.filter(c => c).length +
+                coverage.topics.filter(t => t).length +
+                Object.values(coverage.concepts).filter(c => c).length +
+                Object.values(coverage.learningObjectives).filter(c => c).length;
+            
+            coverage.overall = totalElements > 0 ? Math.round((coveredElements / totalElements) * 100) : 0;
+
+            return coverage;
+        }
+
+        // Alias for backward compatibility
+        function calculateCoverage() {
+            return calculateGradeSpecificCoverage();
+        }
+
+        function updatePFEQValidation() {
+            // Re-match all criteria to curriculum
+            rubricData.criteria.forEach((criterion, index) => {
+                matchCriterionToCurriculum(index);
+            });
+
+            const curriculumData = getCurriculumData(currentSelection.subject, currentSelection.grade, currentSelection.topic);
+            const coverage = calculateGradeSpecificCoverage();
+            
+            // Update coverage percentage
+            const coverageEl = document.getElementById('coveragePercentage');
+            if (coverageEl) {
+                coverageEl.textContent = coverage.overall + '%';
+                // Update color based on percentage
+                if (coverage.overall >= 70) {
+                    coverageEl.style.color = '#48bb78';
+                } else if (coverage.overall >= 40) {
+                    coverageEl.style.color = '#fbbf24';
+                } else {
+                    coverageEl.style.color = '#f56565';
+                }
+            }
+            
+            // Update competencies (grade-specific)
+            const competencyList = document.getElementById('competencyList');
+            if (competencyList) {
+                if (!curriculumData || !curriculumData.competencies || curriculumData.competencies.length === 0) {
+                    competencyList.innerHTML = '<p style="color: #999; font-style: italic;">Select a subject, grade, and topic to see competencies</p>';
+                } else {
+                    competencyList.innerHTML = curriculumData.competencies.map((comp, index) => {
+                        const isCovered = coverage.competencies[index] || false;
+                        const status = isCovered ? 'covered' : 'missing';
+                        const statusText = isCovered ? 'Covered' : 'Not Covered';
+                        
+                        return `
+                            <div class="competency-item ${status}">
+                                <div style="flex: 1;">
+                                    <strong>${comp.name}</strong>
+                                    <div style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                                        ${comp.id || ''}
+                                    </div>
+                                </div>
+                                <div class="competency-status ${status}">${statusText}</div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // Update concepts coverage
+            const conceptCoverage = document.getElementById('conceptCoverage');
+            if (conceptCoverage) {
+                if (Object.keys(coverage.concepts).length === 0) {
+                    conceptCoverage.innerHTML = '<p style="color: #999; font-style: italic;">Select a topic to see concepts</p>';
+                } else {
+                    conceptCoverage.innerHTML = Object.keys(coverage.concepts).sort().map(concept => {
+                        const status = coverage.concepts[concept] ? 'covered' : '';
+                        return `<span class="concept-tag ${status}">${concept}</span>`;
+                    }).join('');
+                }
+            }
+
+            // Update learning objectives if available
+            checkLearningObjectives(coverage);
+
+            renderTopicFilters();
+            updateSuggestions();
+        }
+
+        function checkLearningObjectives(coverage) {
+            const learningObjectivesEl = document.getElementById('learningObjectives');
+            if (!learningObjectivesEl) return;
+
+            const curriculumData = getCurriculumData(currentSelection.subject, currentSelection.grade, currentSelection.topic);
+            
+            if (!curriculumData || !curriculumData.topic || !curriculumData.topic.learningObjectives) {
+                learningObjectivesEl.innerHTML = '<p style="color: #999; font-style: italic;">Select a topic to see learning objectives</p>';
+                return;
+            }
+
+            const objectives = curriculumData.topic.learningObjectives;
+            const totalObjectives = objectives.length;
+            const coveredCount = Object.values(coverage.learningObjectives).filter(c => c).length;
+            const percentage = totalObjectives > 0 ? Math.round((coveredCount / totalObjectives) * 100) : 0;
+
+            let objectivesHtml = `
+                <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px;">
+                    <strong>Coverage: ${coveredCount} / ${totalObjectives} objectives (${percentage}%)</strong>
+                </div>
+            `;
+
+            objectivesHtml += objectives.map(obj => {
+                const isCovered = coverage.learningObjectives[obj] || false;
+                const status = isCovered ? 'covered' : '';
+                const checkmark = isCovered ? '✓' : '○';
+                
+                return `
+                    <div class="learning-objective ${status}">
+                        <span class="learning-objective-check">${checkmark}</span>
+                        <span>${obj}</span>
+                    </div>
+                `;
+            }).join('');
+
+            // Add progression information if available
+            if (curriculumData.topic.progression) {
+                let progressionHtml = '<div class="progression-info"><h4>Curriculum Progression</h4>';
+                
+                if (curriculumData.topic.progression.buildsOn && curriculumData.topic.progression.buildsOn.length > 0) {
+                    progressionHtml += '<div><strong>Builds on:</strong></div>';
+                    curriculumData.topic.progression.buildsOn.forEach(item => {
+                        progressionHtml += `<div class="progression-item">${item}</div>`;
+                    });
+                }
+                
+                if (curriculumData.topic.progression.preparesFor && curriculumData.topic.progression.preparesFor.length > 0) {
+                    progressionHtml += '<div style="margin-top: 10px;"><strong>Prepares for:</strong></div>';
+                    curriculumData.topic.progression.preparesFor.forEach(item => {
+                        progressionHtml += `<div class="progression-item">${item}</div>`;
+                    });
+                }
+                
+                progressionHtml += '</div>';
+                objectivesHtml += progressionHtml;
+            }
+
+            learningObjectivesEl.innerHTML = objectivesHtml;
+        }
+
+        function getCompetencySuggestions() {
+            const curriculumData = getCurriculumData(currentSelection.subject, currentSelection.grade, currentSelection.topic);
+            if (!curriculumData) return [];
+
+            const suggestions = [];
+            curriculumData.competencies.forEach(comp => {
+                const compSuggestions = {
+                    competency: comp.name,
+                    competencyId: comp.id,
+                    suggestions: []
+                };
+
+                // Generate suggestions from learning objectives
+                if (comp.learningObjectives) {
+                    comp.learningObjectives.forEach(obj => {
+                        // Create criterion suggestions based on learning objectives
+                        const suggestion = `Assessment of: ${obj}`;
+                        compSuggestions.suggestions.push(suggestion);
+                    });
+                }
+
+                // Add topic-specific suggestions if topic is selected
+                if (curriculumData.topic && curriculumData.topic.learningObjectives) {
+                    curriculumData.topic.learningObjectives.forEach(obj => {
+                        // Check if this objective relates to this competency
+                        const compKeywords = comp.name.toLowerCase().split(' ');
+                        const objText = obj.toLowerCase();
+                        const matches = compKeywords.filter(kw => kw.length > 4 && objText.includes(kw));
+                        
+                        if (matches.length > 0) {
+                            const suggestion = `Evaluation of student ability to: ${obj}`;
+                            if (!compSuggestions.suggestions.includes(suggestion)) {
+                                compSuggestions.suggestions.push(suggestion);
+                            }
+                        }
+                    });
+                }
+
+                if (compSuggestions.suggestions.length > 0) {
+                    suggestions.push(compSuggestions);
+                }
+            });
+
+            return suggestions;
+        }
+
+        function getLearningObjectiveSuggestions() {
+            const curriculumData = getCurriculumData(currentSelection.subject, currentSelection.grade, currentSelection.topic);
+            if (!curriculumData || !curriculumData.topic || !curriculumData.topic.learningObjectives) {
+                return [];
+            }
+
+            return curriculumData.topic.learningObjectives.map(obj => {
+                return `Demonstrates understanding of: ${obj}`;
+            });
+        }
+
+        function generateCriteriaFromObjectives() {
+            const curriculumData = getCurriculumData(currentSelection.subject, currentSelection.grade, currentSelection.topic);
+            if (!curriculumData || !curriculumData.topic || !curriculumData.topic.learningObjectives) {
+                return [];
+            }
+
+            return curriculumData.topic.learningObjectives.map(obj => {
+                // Generate criterion name from learning objective
+                return `Understanding of ${obj.toLowerCase()}`;
+            });
+        }
+
+        function groupSuggestionsByCompetency(suggestions) {
+            return suggestions;
+        }
+
+        function updateSuggestions() {
+            const suggestionsBox = document.getElementById('suggestionsBox');
+            if (!suggestionsBox) return;
+            
+            const curriculumData = getCurriculumData(currentSelection.subject, currentSelection.grade, currentSelection.topic);
+            
+            if (!curriculumData || !currentSelection.subject || !currentSelection.grade || !currentSelection.topic) {
+                suggestionsBox.innerHTML = '<p style="color: #999; font-style: italic;">Select a subject, grade, and topic to see curriculum-aligned suggestions</p>';
+                return;
+            }
+
+            // Get suggestions grouped by competency
+            const competencySuggestions = getCompetencySuggestions();
+            const learningObjectiveSuggestions = getLearningObjectiveSuggestions();
+
+            if (competencySuggestions.length === 0 && learningObjectiveSuggestions.length === 0) {
+                suggestionsBox.innerHTML = '<p style="color: #999; font-style: italic;">No suggestions available for selected curriculum</p>';
+                return;
+            }
+
+            let suggestionsHtml = '<div class="suggestion-box">';
+
+            // Group by competency
+            if (competencySuggestions.length > 0) {
+                competencySuggestions.forEach(compGroup => {
+                    suggestionsHtml += `
+                        <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e0e0e0;">
+                            <h4 style="color: #667eea; margin-bottom: 10px; font-size: 0.95em;">
+                                ${compGroup.competency}
+                                ${compGroup.competencyId ? `<span style="color: #999; font-size: 0.85em;">(${compGroup.competencyId})</span>` : ''}
+                            </h4>
+                            ${compGroup.suggestions.map(suggestion => `
+                                <div class="suggestion-item">
+                                    <div>${suggestion}</div>
+                                    <button class="btn btn-primary" onclick="addSuggestedCriterion('${suggestion.replace(/'/g, "\\'")}')" style="padding: 5px 10px; font-size: 0.85em;">Add</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                });
+            }
+
+            // Add learning objective-based suggestions
+            if (learningObjectiveSuggestions.length > 0 && competencySuggestions.length === 0) {
+                learningObjectiveSuggestions.forEach(suggestion => {
+                    suggestionsHtml += `
+                        <div class="suggestion-item">
+                            <div>${suggestion}</div>
+                            <button class="btn btn-primary" onclick="addSuggestedCriterion('${suggestion.replace(/'/g, "\\'")}')" style="padding: 5px 10px; font-size: 0.85em;">Add</button>
+                        </div>
+                    `;
+                });
+            }
+
+            suggestionsHtml += '</div>';
+            suggestionsBox.innerHTML = suggestionsHtml;
+        }
+
+        function addSuggestedCriterion(suggestion) {
+            const input = document.getElementById('newCriterion');
+            input.value = suggestion;
+            addCriterion();
+        }
+
+        // Initialize - wait for curriculum data to load with timeout and error handling
+        let initRetryCount = 0;
+        const MAX_INIT_RETRIES = 50; // 5 seconds max (50 * 100ms)
+        const INIT_RETRY_DELAY = 100;
+        
+        function initializeApp() {
+            initRetryCount++;
+            
+            // Check if curriculum data is loaded
+            if (typeof pfeqCurriculum !== 'undefined' && pfeqCurriculum && pfeqCurriculum.subjects) {
+                const subjectCount = Object.keys(pfeqCurriculum.subjects).length;
+                
+                if (subjectCount > 0) {
+                    // Data loaded successfully - log for debugging
+                    console.log('PFEQ Curriculum data loaded successfully');
+                    console.log(`Found ${subjectCount} subject(s)`);
+                    
+                    // Count total grades across all subjects
+                    let totalGrades = 0;
+                    Object.keys(pfeqCurriculum.subjects).forEach(subject => {
+                        const grades = Object.keys(pfeqCurriculum.subjects[subject].grades || {});
+                        totalGrades += grades.length;
+                        console.log(`  ${subject}: ${grades.length} grade(s) - ${grades.join(', ')}`);
+                    });
+                    console.log(`Total grades across all subjects: ${totalGrades}`);
+                    
+                    // Verify data structure
+                    let hasSpecificGrades = false;
+                    Object.keys(pfeqCurriculum.subjects).forEach(subject => {
+                        const grades = Object.keys(pfeqCurriculum.subjects[subject].grades || {});
+                        if (grades.some(g => /Secondary \d+|Elementary \d+/.test(g))) {
+                            hasSpecificGrades = true;
+                        }
+                    });
+                    
+                    if (!hasSpecificGrades && totalGrades > 0) {
+                        console.warn('Warning: No specific grade levels found (e.g., "Secondary 1", "Elementary 2"). Only generic grades detected.');
+                    }
+                    
+                    // Initialize the app
+                    updateLevelNames();
+                    updatePreview();
+                    initializePFEQCurriculum();
+                    initializePFEQData();
+                    
+                    // Remove any loading messages
+                    const loadingMsg = document.getElementById('dataLoadingMessage');
+                    if (loadingMsg) loadingMsg.remove();
+                    
+                    return; // Success - stop retrying
+                } else {
+                    console.warn('PFEQ Curriculum data structure exists but has no subjects');
+                }
+            }
+            
+            // Data not loaded yet - check if we should retry
+            if (initRetryCount < MAX_INIT_RETRIES) {
+                // Show loading message on first retry
+                if (initRetryCount === 1) {
+                    const selectionDisplay = document.getElementById('selectionDisplay');
+                    if (selectionDisplay) {
+                        selectionDisplay.innerHTML = '<span style="color: #667eea;">Loading curriculum data...</span>';
+                    }
+                }
+                
+                // Retry after a short delay
+                setTimeout(initializeApp, INIT_RETRY_DELAY);
+            } else {
+                // Max retries reached - show error
+                console.error('Failed to load PFEQ curriculum data after', MAX_INIT_RETRIES, 'attempts');
+                
+                const selectionDisplay = document.getElementById('selectionDisplay');
+                if (selectionDisplay) {
+                    selectionDisplay.innerHTML = '<span style="color: #f00;">Error: Could not load curriculum data. Please refresh the page or check that pfeq_curriculum_data.js exists.</span>';
+                }
+                
+                // Show error in subject dropdown
+                const subjectSelect = document.getElementById('subjectSelect');
+                if (subjectSelect) {
+                    const errorOption = document.createElement('option');
+                    errorOption.value = '';
+                    errorOption.textContent = 'Error: Data not loaded';
+                    errorOption.disabled = true;
+                    subjectSelect.appendChild(errorOption);
+                }
+            }
+        }
+        
+        // Load rubric if requested from calendar page
+        function loadSavedRubric() {
+            const rubricId = localStorage.getItem('loadRubricId');
+            if (rubricId) {
+                localStorage.removeItem('loadRubricId');
+                const savedRubrics = JSON.parse(localStorage.getItem('savedRubrics') || '[]');
+                const rubric = savedRubrics.find(r => r.id === rubricId);
+                if (rubric) {
+                    rubricData = {
+                        title: rubric.title,
+                        taskDescription: rubric.taskDescription,
+                        numLevels: rubric.numLevels,
+                        levelNames: rubric.levelNames,
+                        criteria: rubric.criteria,
+                        curriculum: rubric.curriculum || {
+                            subject: null,
+                            grade: null,
+                            topic: null
+                        }
+                    };
+                    
+                    document.getElementById('rubricTitle').value = rubricData.title;
+                    document.getElementById('taskDescription').value = rubricData.taskDescription;
+                    document.getElementById('numLevels').value = rubricData.numLevels;
+                    document.getElementById('levelNames').value = rubric.levelNames.join(', ');
+                    
+                    // Restore curriculum selection
+                    if (rubricData.curriculum.subject) {
+                        selectSubject(rubricData.curriculum.subject, false);
+                        if (rubricData.curriculum.grade) {
+                            setTimeout(() => {
+                                selectGrade(rubricData.curriculum.grade, false);
+                                if (rubricData.curriculum.topic) {
+                                    setTimeout(() => {
+                                        selectTopic(rubricData.curriculum.topic, false);
+                                    }, 100);
+                                }
+                            }, 100);
+                        }
+                    }
+                    
+                    renderCriteria();
+                    updatePreview();
+                    updatePFEQValidation();
+                }
+            }
+        }
+        
+        // Start initialization after a short delay to ensure script is loaded
+        setTimeout(function() {
+            initializeApp();
+            setTimeout(loadSavedRubric, 500);
+        }, 50);
+        
+        // Update PFEQ validation when title or description changes
+        document.getElementById('rubricTitle').addEventListener('input', updatePFEQValidation);
+        document.getElementById('taskDescription').addEventListener('input', updatePFEQValidation);
+    </script>
+</body>
+</html>

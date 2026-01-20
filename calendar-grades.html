@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar & Grades - Teacher Tool</title>
+    <link rel="stylesheet" href="calendar-grades.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="flex: 1;"></div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="window.location.href='rubric-builder.html'" style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.5);">📋 Rubric Builder</button>
+                    <button class="btn btn-primary" onclick="window.location.href='calendar-grades.html'" style="background: rgba(255,255,255,0.2); border: 2px solid white;">📅 Calendar & Grades</button>
+                </div>
+            </div>
+            <h1>📅 Calendar & Grades</h1>
+            <p>Schedule rubrics, manage students, and track grades</p>
+        </div>
+
+        <div class="main-tabs">
+            <button class="tab-btn active" onclick="showTab('setup')">⚙️ Setup</button>
+            <button class="tab-btn" onclick="showTab('calendar')">📅 Calendar</button>
+            <button class="tab-btn" onclick="showTab('students')">👥 Students</button>
+            <button class="tab-btn" onclick="showTab('rubrics')">📋 Rubrics</button>
+            <button class="tab-btn" onclick="showTab('grades')">📊 Grades</button>
+        </div>
+
+        <!-- Setup Tab -->
+        <div id="setupTab" class="tab-content active">
+            <div class="setup-section">
+                <h2>Schedule Configuration</h2>
+                
+                <div class="form-group">
+                    <label for="cycleLength">Day Cycle Length</label>
+                    <input type="number" id="cycleLength" min="1" max="20" value="9" onchange="updateScheduleConfig()">
+                    <p class="help-text">Number of days in your school's cycle (e.g., 9-day cycle)</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Class Schedule</label>
+                    <div id="scheduleGrid" class="schedule-grid"></div>
+                    <button class="btn btn-primary" onclick="addClassToSchedule()" style="margin-top: 10px;">+ Add Class</button>
+                </div>
+
+                <div class="form-group">
+                    <label>School Calendar Upload</label>
+                    <input type="file" id="calendarUpload" accept=".csv,.json" onchange="handleCalendarUpload(event)">
+                    <p class="help-text">Upload CSV or JSON file with holidays and non-instructional days</p>
+                    <div id="calendarPreview" class="calendar-preview"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>School Year Dates</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label for="startDate">Start Date</label>
+                            <input type="date" id="startDate" onchange="updateScheduleConfig()">
+                        </div>
+                        <div>
+                            <label for="endDate">End Date</label>
+                            <input type="date" id="endDate" onchange="updateScheduleConfig()">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-success" onclick="saveScheduleConfig()">💾 Save Configuration</button>
+            </div>
+        </div>
+
+        <!-- Calendar Tab -->
+        <div id="calendarTab" class="tab-content">
+            <div class="calendar-controls">
+                <button class="btn btn-secondary" onclick="changeMonth(-1)">← Previous</button>
+                <h2 id="currentMonth"></h2>
+                <button class="btn btn-secondary" onclick="changeMonth(1)">Next →</button>
+                <button class="btn btn-primary" onclick="showToday()">Today</button>
+                <select id="viewMode" onchange="changeViewMode()">
+                    <option value="month">Month View</option>
+                    <option value="week">Week View</option>
+                </select>
+            </div>
+            <div id="calendarView" class="calendar-view"></div>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="studentsTab" class="tab-content">
+            <div class="students-section">
+                <div class="section-header">
+                    <h2>Student Roster</h2>
+                    <div>
+                        <button class="btn btn-primary" onclick="showAddStudentModal()">+ Add Student</button>
+                        <button class="btn btn-secondary" onclick="importStudents()">📥 Import CSV</button>
+                        <button class="btn btn-secondary" onclick="exportStudents()">📤 Export CSV</button>
+                    </div>
+                </div>
+                
+                <div class="filter-bar">
+                    <input type="text" id="studentSearch" placeholder="Search students..." oninput="filterStudents()">
+                    <select id="classFilter" onchange="filterStudents()">
+                        <option value="">All Classes</option>
+                    </select>
+                </div>
+
+                <div id="studentsList" class="students-list"></div>
+            </div>
+        </div>
+
+        <!-- Rubrics Tab -->
+        <div id="rubricsTab" class="tab-content">
+            <div class="rubrics-section">
+                <div class="section-header">
+                    <h2>Saved Rubrics</h2>
+                    <button class="btn btn-primary" onclick="window.location.href='rubric-builder.html'">+ Create New Rubric</button>
+                </div>
+                
+                <div id="rubricsList" class="rubrics-list"></div>
+            </div>
+        </div>
+
+        <!-- Grades Tab -->
+        <div id="gradesTab" class="tab-content">
+            <div class="grades-section">
+                <div class="section-header">
+                    <h2>Grade Collection</h2>
+                    <select id="assignmentSelect" onchange="loadAssignmentGrades()">
+                        <option value="">Select Assignment</option>
+                    </select>
+                </div>
+                
+                <div id="gradeEntryArea" class="grade-entry-area">
+                    <p class="empty-message">Select an assignment to begin grading</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addStudentModal')">&times;</span>
+            <h2>Add Student</h2>
+            <form id="addStudentForm" onsubmit="saveStudent(event)">
+                <div class="form-group">
+                    <label>Student Name *</label>
+                    <input type="text" id="studentName" required>
+                </div>
+                <div class="form-group">
+                    <label>Student ID</label>
+                    <input type="text" id="studentId">
+                </div>
+                <div class="form-group">
+                    <label>Class Sections</label>
+                    <div id="classSectionsInput"></div>
+                    <button type="button" class="btn btn-secondary" onclick="addClassSection()" style="margin-top: 5px;">+ Add Section</button>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addStudentModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assign Rubric Modal -->
+    <div id="assignRubricModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('assignRubricModal')">&times;</span>
+            <h2>Assign Rubric</h2>
+            <form id="assignRubricForm" onsubmit="saveAssignment(event)">
+                <div class="form-group">
+                    <label>Select Rubric *</label>
+                    <select id="assignRubricSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Due Date *</label>
+                    <input type="date" id="assignDueDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Class/Period *</label>
+                    <select id="assignClass" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Weight (%)</label>
+                    <input type="number" id="assignWeight" min="0" max="100" value="10" step="0.1">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('assignRubricModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Assign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Grade Entry Modal -->
+    <div id="gradeEntryModal" class="modal large-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('gradeEntryModal')">&times;</span>
+            <h2 id="gradeEntryTitle">Enter Grades</h2>
+            <div id="gradeEntryContent"></div>
+        </div>
+    </div>
+
+    <script src="calendar-grades.js"></script>
+</body>
+</html>
